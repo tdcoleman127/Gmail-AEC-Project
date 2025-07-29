@@ -62,6 +62,10 @@ sideCol, mainCol = st.columns([1, 3])
 with sideCol:
     # Normal folders
     st.header("📂 Folders")
+    base_folders = ["Inbox", "Notifications", "Work", "Personal", "Sent"]
+    smart_folders = ["Work-Social", "Networking", "Work-Urgents"]
+    
+    # Count emails for all folders
     folders = {}
     for email in st.session_state.emails:
         folder = email['folder']
@@ -71,8 +75,9 @@ with sideCol:
         if not email['read']:
             folders[folder]['unread'] += 1
 
-    # Folder navigation
-    for folder_name, counts in folders.items():
+    # Always show base folders first
+    for folder_name in base_folders:
+        counts = folders.get(folder_name, {'total': 0, 'unread': 0})
         unread_badge = f" ({counts['unread']})" if counts['unread'] > 0 else ""
         if st.button(f"{folder_name}{unread_badge}", key=f"folder_{folder_name}"):
             st.session_state.selected_folder = folder_name
@@ -83,52 +88,57 @@ with sideCol:
         st.session_state.smart_folders_visible = False
     if 'smart_folders_initialized' not in st.session_state:
         st.session_state.smart_folders_initialized = False
+    if 'smart_emails' not in st.session_state:
+        st.session_state.smart_emails = []
 
-    # Smart Categories section
-    smart_folders = ["Work-Social", "Networking", "Work-Urgents"]
-
+    st.divider()
     # Button to classify or shuffle
     if st.button("🧠 G-Shuffle"):
         if not st.session_state.smart_folders_initialized:
-            # First press: Move emails to smart folders
-            base_folders = ["Inbox", "Notifications", "Work", "Personal", "Sent"]
+            # First press: Create copies of some emails for smart folders
             base_emails = [email for email in st.session_state.emails if email['folder'] in base_folders]
-            random.shuffle(base_emails)
+            selected_emails = random.sample(base_emails, min(15, len(base_emails)))  # Select up to 15 emails
             
-            # Distribute emails to smart folders
-            for i, email in enumerate(base_emails):
-                email['folder'] = smart_folders[i % len(smart_folders)]
+            # Create copies for smart folders
+            st.session_state.smart_emails = []
+            for email in selected_emails:
+                smart_email = email.copy()
+                smart_email['id'] = f"smart_{email['id']}"  # New unique ID
+                smart_email['folder'] = random.choice(smart_folders)
+                st.session_state.smart_emails.append(smart_email)
             
             st.session_state.smart_folders_initialized = True
             st.session_state.smart_folders_visible = True
         else:
             # Subsequent presses: Shuffle between smart folders
-            smart_emails = [email for email in st.session_state.emails if email['folder'] in smart_folders]
-            random.shuffle(smart_emails)
-            
-            # Redistribute among smart folders
-            for i, email in enumerate(smart_emails):
-                email['folder'] = smart_folders[i % len(smart_folders)]
+            for email in st.session_state.smart_emails:
+                email['folder'] = random.choice(smart_folders)
         
         st.rerun()
 
-    # Display smart folders only after button press
+    # Display smart folders section if visible
     if st.session_state.smart_folders_visible:
-        st.header("🧠 Smart Categories")
-        smart_folder_counts = {sf: {'total': 0, 'unread': 0} for sf in smart_folders}
-        for email in st.session_state.emails:
-            if email['folder'] in smart_folder_counts:
-                smart_folder_counts[email['folder']]['total'] += 1
-                if not email['read']:
-                    smart_folder_counts[email['folder']]['unread'] += 1
+        st.header("Smart Categories")
+        # Count smart emails
+        smart_counts = {}
+        for email in st.session_state.smart_emails:
+            folder = email['folder']
+            if folder not in smart_counts:
+                smart_counts[folder] = {'total': 0, 'unread': 0}
+            smart_counts[folder]['total'] += 1
+            if not email['read']:
+                smart_counts[folder]['unread'] += 1
 
-        # Smart folder navigation
         for smart_folder in smart_folders:
-            counts = smart_folder_counts.get(smart_folder, {'total': 0, 'unread': 0})
+            counts = smart_counts.get(smart_folder, {'total': 0, 'unread': 0})
             unread_badge = f" ({counts['unread']})" if counts['unread'] > 0 else ""
             if st.button(f"{smart_folder}{unread_badge}", key=f"smart_{smart_folder}"):
                 st.session_state.selected_folder = smart_folder
                 st.session_state.selected_email = None
+
+    # Update emails list to include both original and smart emails
+    if st.session_state.smart_folders_visible:
+        st.session_state.emails = [e for e in st.session_state.emails if e['folder'] in base_folders] + st.session_state.smart_emails
 
 
 with mainCol:
