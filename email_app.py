@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import random
 
-st.set_page_config(page_title="AEC Demo Dashboard", page_icon=":tada:", layout="wide")
+st.set_page_config(page_title="AEC Demo Dashboard", page_icon=":letterbox:", layout="wide")
 
 # Dummy data for emails
 # Need Barbaros to provide the actual data
@@ -48,8 +48,7 @@ if 'selected_email' not in st.session_state:
     st.session_state.selected_email = None
 
 # Main dashboard
-st.title("📧 AEC-style Dashboard")
-st.subheader("Let's party")
+st.title("📭 Email-esque Dashboard for AEC Demo")
 
 # Sidebar for folders
 st.sidebar.header("📁 Normal Folders")
@@ -93,7 +92,7 @@ with sideCol:
 
     st.divider()
     # Button to classify or shuffle
-    if st.button("🧠 G-Shuffle"):
+    if st.button("*G-Organize*"):
         if not st.session_state.smart_folders_initialized:
             # First press: Create copies of some emails for smart folders
             base_emails = [email for email in st.session_state.emails if email['folder'] in base_folders]
