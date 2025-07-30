@@ -6,8 +6,6 @@ import random
 st.set_page_config(page_title="AEC Demo Dashboard", page_icon=":letterbox:", layout="wide")
 
 # Dummy data for emails
-# Need Barbaros to provide the actual data
-# Sample email data generator
 def generate_sample_emails():
     senders = [
         "john.doe@company.com", "sarah.wilson@startup.io", "notifications@github.com",
@@ -49,12 +47,6 @@ if 'selected_email' not in st.session_state:
 
 # Main dashboard
 st.title("📭 Email-esque Dashboard for AEC Demo")
-
-# Sidebar for folders
-st.sidebar.header("📁 Normal Folders")
-
-# Get unique folders and email counts
-
 
 sideCol, mainCol = st.columns([1, 3])
 
