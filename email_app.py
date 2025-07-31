@@ -84,7 +84,7 @@ with sideCol:
 
     st.divider()
     # Button to classify or shuffle
-    if st.button("*G-Organize*"):
+    if st.button("*G-Organize*", type="primary"):
         if not st.session_state.smart_folders_initialized:
             # First press: Create copies of some emails for smart folders
             base_emails = [email for email in st.session_state.emails if email['folder'] in base_folders]
@@ -112,13 +112,7 @@ with sideCol:
         st.header("Smart Categories")
         # Count smart emails
         smart_counts = {}
-        for email in st.session_state.smart_emails:
-            folder = email['folder']
-            if folder not in smart_counts:
-                smart_counts[folder] = {'total': 0, 'unread': 0}
-            smart_counts[folder]['total'] += 1
-            if not email['read']:
-                smart_counts[folder]['unread'] += 1
+        smart_counts = {folder: {'total': 0, 'unread': 0} for folder in smart_folders}
 
         for smart_folder in smart_folders:
             counts = smart_counts.get(smart_folder, {'total': 0, 'unread': 0})
@@ -133,7 +127,7 @@ with sideCol:
 
 
 with mainCol:
-    st.header("📧 Emails")
+    # st.header("📧 Emails")
     # Main content area with tabs
     tab1, tab2, tab3 = st.tabs(["📧 Email List", "📝 Compose", "⚙️ Settings"])
 
@@ -144,7 +138,8 @@ with mainCol:
         # Email list header
         col1, col2, col3 = st.columns([3, 1, 1])
         with col1:
-            st.subheader(f"{st.session_state.selected_folder} ({len(filtered_emails)} emails)")
+            print()
+            # st.subheader(f"{st.session_state.selected_folder} ({len(filtered_emails)} emails)")
         with col2:
             if st.button("🔄 Refresh"):
                 st.rerun()
@@ -198,23 +193,35 @@ with mainCol:
             
             with col2:
                 # Star button
-                star_icon = "⭐" if email['starred'] else "☆"
-                if st.button(star_icon, key=f"star_{email['id']}"):
-                    email['starred'] = not email['starred']
-                    st.rerun()
+                # star_icon = "⭐" if email['starred'] else "☆"
+                # if st.button(star_icon, key=f"star_{email['id']}"):
+                #     email['starred'] = not email['starred']
+                #     st.rerun()
+                print()
             
+            # with col3:
+            #     # Sender and subject
+            #     read_style = "" if email['read'] else "**"
+            #     st.write(f"{email['sender'][:40]}")
+            #     if st.button(f"{read_style}{email['subject']}{read_style}", 
+            #                 key=f"email_{email['id']}", 
+            #                 use_container_width=True):
+            #         st.session_state.selected_email = email['id']
+            #         email['read'] = True
             with col3:
-                # Sender and subject
+                # Combined sender and subject
                 read_style = "" if email['read'] else "**"
-                if st.button(f"{read_style}{email['sender']}{read_style}", 
+                combined_text = f"Date: {email['timestamp'].strftime("%m/%d")}\n - Sender: {email['sender'][:30]}\n - Subject: {email['subject']}"
+                if st.button(f"{read_style}{combined_text}{read_style}", 
                             key=f"email_{email['id']}", 
                             use_container_width=True):
                     st.session_state.selected_email = email['id']
                     email['read'] = True
-            
+
             with col4:
                 # Subject preview
-                st.write(f"{email['subject'][:40]}...")
+                print()
+                
             
             with col5:
                 # Timestamp
